@@ -65,6 +65,38 @@ def test_completed_courses_displays_course_details_for_logged_in_student(
     assert b"Grade: B+" in response.data
 
 
+def test_completed_courses_displays_credit_weighted_gpa(client, app):
+    student_id = create_logged_in_student(client, app)
+    grades_and_credit_hours = [
+        ("A", 1),
+        ("B", 2),
+        ("C", 3),
+        ("D", 4),
+        ("F", 5),
+    ]
+    with app.app_context():
+        db.session.add_all(
+            [
+                CompletedCourse(
+                    student_id=student_id,
+                    course_identifier=f"COURSE{index}",
+                    course_name=f"Course {index}",
+                    credit_hours=credit_hours,
+                    earned_grade=grade,
+                )
+                for index, (grade, credit_hours) in enumerate(
+                    grades_and_credit_hours
+                )
+            ]
+        )
+        db.session.commit()
+
+    response = client.get("/completed-courses")
+
+    assert response.status_code == 200
+    assert b"Current GPA: 1.33" in response.data
+
+
 def test_completed_courses_displays_empty_message(client, app):
     create_logged_in_student(client, app)
 
@@ -72,3 +104,4 @@ def test_completed_courses_displays_empty_message(client, app):
 
     assert response.status_code == 200
     assert b"You have no completed courses." in response.data
+    assert b"No GPA is available." in response.data
