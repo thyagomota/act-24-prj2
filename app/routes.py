@@ -18,6 +18,7 @@ from app.models import CompletedCourse, Student
 
 bp = Blueprint("main", __name__)
 EMAIL_PATTERN = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+GRADE_POINTS = {"A": 4, "B": 3, "C": 2, "D": 1, "F": 0}
 
 
 def _registration_error(student_id, full_name, email, password):
@@ -41,6 +42,24 @@ def login_required(view):
         return view(*args, **kwargs)
 
     return wrapped_view
+
+
+def _calculate_gpa(courses):
+    """Return the credit-hour-weighted GPA, or None when it is unavailable."""
+    total_credit_hours = 0
+    total_grade_points = 0
+
+    for course in courses:
+        grade = course.earned_grade.strip().upper()
+        grade_points = GRADE_POINTS.get(grade[:1])
+        if grade_points is None:
+            return None
+        total_credit_hours += course.credit_hours
+        total_grade_points += grade_points * course.credit_hours
+
+    if total_credit_hours <= 0:
+        return None
+    return total_grade_points / total_credit_hours
 
 
 @bp.route("/register", methods=["GET", "POST"])
@@ -122,7 +141,10 @@ def completed_courses():
     courses = CompletedCourse.query.filter_by(
         student_id=session["student_id"]
     ).all()
-    return render_template("completed_courses.html", courses=courses)
+    current_gpa = _calculate_gpa(courses)
+    return render_template(
+        "completed_courses.html", courses=courses, current_gpa=current_gpa
+    )
 
 
 @bp.route("/logout", methods=["POST"])
