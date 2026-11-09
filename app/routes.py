@@ -147,6 +147,30 @@ def completed_courses():
     )
 
 
+@bp.route("/completed-courses/<int:course_id>/edit", methods=["GET", "POST"])
+@login_required
+def edit_completed_course_grade(course_id):
+    course = CompletedCourse.query.filter_by(
+        id=course_id, student_id=session["student_id"]
+    ).first()
+    if course is None:
+        flash("Completed course not found.", "error")
+        return redirect(url_for("main.completed_courses"))
+
+    if request.method == "POST":
+        grade = request.form.get("earned_grade", "").strip().upper()
+        if grade not in GRADE_POINTS:
+            flash("Grade must be one of A, B, C, D, or F.", "error")
+            return render_template("edit_course_grade.html", course=course), 400
+
+        course.earned_grade = grade
+        db.session.commit()
+        flash("Course grade updated.", "success")
+        return redirect(url_for("main.completed_courses"))
+
+    return render_template("edit_course_grade.html", course=course)
+
+
 @bp.route("/logout", methods=["POST"])
 def logout():
     session.clear()
