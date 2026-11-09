@@ -2,6 +2,7 @@
 {% block title %}Student dashboard{% endblock %}
 {% block content %}
   <h1>Welcome, {{ student.full_name }}</h1>
+  <a href="{{ url_for('main.completed_courses') }}">View completed courses</a>
   <form method="post" action="{{ url_for('main.logout') }}">
     <button type="submit">Log out</button>
   </form>

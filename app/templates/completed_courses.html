@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Completed courses{% endblock %}
+{% block content %}
+  <h1>Completed courses</h1>
+  {% if courses %}
+    <ul>
+      {% for course in courses %}
+        <li>
+          {{ course.course_identifier }} - {{ course.course_name }},
+          {{ course.credit_hours }} credit hours, Grade: {{ course.earned_grade }}
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>You have no completed courses.</p>
+  {% endif %}
+{% endblock %}

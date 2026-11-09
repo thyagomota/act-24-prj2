@@ -14,7 +14,7 @@ from sqlalchemy import or_
 from sqlalchemy.exc import IntegrityError
 
 from app import db
-from app.models import Student
+from app.models import CompletedCourse, Student
 
 bp = Blueprint("main", __name__)
 EMAIL_PATTERN = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
@@ -114,6 +114,15 @@ def dashboard():
         flash("Please log in to access that page.", "error")
         return redirect(url_for("main.login"))
     return render_template("dashboard.html", student=student)
+
+
+@bp.route("/completed-courses")
+@login_required
+def completed_courses():
+    courses = CompletedCourse.query.filter_by(
+        student_id=session["student_id"]
+    ).all()
+    return render_template("completed_courses.html", courses=courses)
 
 
 @bp.route("/logout", methods=["POST"])
