@@ -17,3 +17,12 @@ class Student(db.Model):
     def check_password(self, password):
         """Return whether the supplied password matches this account."""
         return check_password_hash(self.password_hash, password)
+
+
+class CompletedCourse(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    student_id = db.Column(db.Integer, db.ForeignKey("student.id"), nullable=False)
+    course_identifier = db.Column(db.String(80), nullable=False)
+    course_name = db.Column(db.String(160), nullable=False)
+    credit_hours = db.Column(db.Integer, nullable=False)
+    earned_grade = db.Column(db.String(2), nullable=False)
