@@ -1,4 +1,5 @@
 import re
+from functools import wraps
 
 from flask import (
     Blueprint,
@@ -28,6 +29,18 @@ def _registration_error(student_id, full_name, email, password):
     if len(password) < 8:
         return "Password must be at least 8 characters long."
     return None
+
+
+def login_required(view):
+    """Redirect visitors to the login page unless they have an active session."""
+    @wraps(view)
+    def wrapped_view(*args, **kwargs):
+        if "student_id" not in session:
+            flash("Please log in to access that page.", "error")
+            return redirect(url_for("main.login"))
+        return view(*args, **kwargs)
+
+    return wrapped_view
 
 
 @bp.route("/register", methods=["GET", "POST"])
@@ -86,6 +99,25 @@ def login():
         flash("Invalid email or password.", "error")
         return render_template("login.html"), 400
 
+    session.clear()
     session["student_id"] = student.id
     flash("Login successful.", "success")
-    return redirect(url_for("main.register"))
+    return redirect(url_for("main.dashboard"))
+
+
+@bp.route("/dashboard")
+@login_required
+def dashboard():
+    student = db.session.get(Student, session["student_id"])
+    if student is None:
+        session.clear()
+        flash("Please log in to access that page.", "error")
+        return redirect(url_for("main.login"))
+    return render_template("dashboard.html", student=student)
+
+
+@bp.route("/logout", methods=["POST"])
+def logout():
+    session.clear()
+    flash("You have been logged out.", "success")
+    return redirect(url_for("main.login"))
