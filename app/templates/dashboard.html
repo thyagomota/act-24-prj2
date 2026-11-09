@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block title %}Student dashboard{% endblock %}
+{% block content %}
+  <h1>Welcome, {{ student.full_name }}</h1>
+  <form method="post" action="{{ url_for('main.logout') }}">
+    <button type="submit">Log out</button>
+  </form>
+{% endblock %}
