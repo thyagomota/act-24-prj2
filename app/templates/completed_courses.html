@@ -13,6 +13,9 @@
         <li>
           {{ course.course_identifier }} - {{ course.course_name }},
           {{ course.credit_hours }} credit hours, Grade: {{ course.earned_grade }}
+          <a href="{{ url_for('main.edit_completed_course_grade', course_id=course.id) }}">
+            Edit grade
+          </a>
         </li>
       {% endfor %}
     </ul>

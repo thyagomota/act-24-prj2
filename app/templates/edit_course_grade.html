@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Edit course grade{% endblock %}
+{% block content %}
+  <h1>Edit grade for {{ course.course_identifier }}</h1>
+  <form method="post">
+    <label for="earned_grade">Letter grade</label>
+    <select id="earned_grade" name="earned_grade" required>
+      {% for grade in ["A", "B", "C", "D", "F"] %}
+        <option value="{{ grade }}"{% if course.earned_grade == grade %} selected{% endif %}>
+          {{ grade }}
+        </option>
+      {% endfor %}
+    </select>
+    <button type="submit">Save grade</button>
+  </form>
+{% endblock %}
